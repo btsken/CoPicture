@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>WebSocket Test</title>
+
+
+</head>
+
+<body>
+    <div>
+        <canvas id="myCanvas">
+        </canvas>
+    </div>
+    <h2>WebSocket Test</h2>
+    <div>
+        <input type="text" id="msg">
+        <button id="send">send</button>
+    </div>
+
+    <div id="output"></div>
+</body>
+
+</html>
+<script language="javascript" type="text/javascript">
+var wsUri = "ws://localhost:8081";
+var output;
+var msg = document.getElementById("msg"),
+    sendBtn = document.getElementById("send");
+
+
+
+var mainCanvas = document.getElementById("myCanvas");
+var mainContext = mainCanvas.getContext('2d');
+
+var canvasWidth = mainCanvas.width;
+var canvasHeight = mainCanvas.height;
+var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+
+var circles = new Array();
+
+function Circle(initialX, initialY, radius) {
+    this.radius = radius;
+    this.initialX = initialX;
+    this.initialY = initialY;
+}
+
+Circle.prototype.update = function() {
+
+    // The following code is responsible for actually drawing the circle on the screen
+    mainContext.beginPath();
+    mainContext.arc(this.initialX, this.initialY, this.radius, 0, 2 * Math.PI);
+    mainContext.closePath();
+    mainContext.fillStyle = 'rgba(177, 0, 129, 1)';
+    mainContext.fill();
+};
+
+
+mainCanvas.addEventListener("mouseup", function(e) {
+    var circle = new Circle(e.pageX, e.pageY, 10);
+    // circle.update();
+    // circles.push(circle);
+
+    doSend(JSON.stringify(new Command("circle", JSON.stringify(circle))));
+
+}, false);
+
+init();
+
+function init() {
+    output = document.getElementById("output");
+    testWebSocket();
+
+    sendBtn.addEventListener("click", function(e) {
+        doSend(msg.value);
+    }, false);
+}
+
+function testWebSocket() {
+    websocket = new WebSocket(wsUri);
+    websocket.onopen = function(evt) {
+        onOpen(evt)
+    };
+
+    websocket.onclose = function(evt) {
+        onClose(evt)
+    };
+
+    websocket.onmessage = function(evt) {
+        onMessage(evt)
+    };
+
+    websocket.onerror = function(evt) {
+        onError(evt)
+    };
+}
+
+function onOpen(evt) {
+    writeToScreen("CONNECTED");
+}
+
+function onClose(evt) {
+    writeToScreen("DISCONNECTED");
+}
+
+function onMessage(evt) {
+    writeToScreen('<span style="color:blue;">RESPONSE:' + evt.data + '</span>');
+
+    var object = JSON.parse(evt.data);
+
+
+    switch (object.name) {
+        case "circle":
+            var obj = JSON.parse(object.object);
+            var circle = new Circle(obj.initialX, obj.initialY, obj.radius);
+            circle.update();
+            break;
+        case "onlineNum":
+            break;
+    }
+
+
+
+}
+
+function onError(evt) {
+    writeToScreen('<span style="color:red;">ERROR:</span>' + evt.data);
+}
+
+function doSend(message) {
+    writeToScreen("SENT: " + message);
+    websocket.send(message);
+}
+
+function writeToScreen(message) {
+    var pre = document.createElement("p");
+    pre.style.wordWrap = "break-word";
+    pre.innerHTML = message;
+    output.appendChild(pre);
+}
+
+
+function Command(name, object) {
+    this.name = name;
+    this.object = object;
+}
+
+Command.prototype.send = function() {
+    ws.broadcast(JSON.stringify(this));
+};
+</script>
