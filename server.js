@@ -7,11 +7,13 @@ var templete = null,
     background = null;
 
 var ONLINE_NUM = "onlineNum",
-    TEMPLETE = "templete",
-    BACKGROUNF = "background",
-    CIRCLE_ARY = "circle";
+    // TEMPLETE = "templete",
+    // BACKGROUNF = "background",
+    CIRCLE_ARY = "circle",
+    PICTURE = "picture";
 
-var lastMessage = "";    
+var circlelastMessage = "",
+    picturelastMessage = "";
 
 ws.broadcast = function(data) {
     for (var i in this.clients) {
@@ -21,7 +23,18 @@ ws.broadcast = function(data) {
 
 ws.on('connection', function(_ws) {
     _ws.on('message', function(message) {
-        lastMessage = message;
+
+        var object = JSON.parse(message);
+
+        switch (object.name) {
+            case CIRCLE_ARY:
+                circlelastMessage = message;
+                break;
+            case PICTURE:
+                picturelastMessage = message;
+                break;
+        }
+
         ws.broadcast(message);
     });
 
@@ -31,7 +44,9 @@ ws.on('connection', function(_ws) {
     });
 
     sendCommand(ONLINE_NUM, new Server(this.clients.length));
-    ws.broadcast(lastMessage);
+
+    ws.broadcast(circlelastMessage);
+    ws.broadcast(picturelastMessage);
 });
 
 function sendCommand(commandName, object) {
@@ -41,10 +56,6 @@ function sendCommand(commandName, object) {
 function Server(clientNum) {
     this.clientNum = clientNum;
 }
-
-// Server.prototype.send = function() {
-//     ws.broadcast(JSON.stringify(this));
-// };
 
 function Command(name, object) {
     this.name = name;

@@ -12,6 +12,8 @@
     <div>
         <canvas id="myCanvas">
         </canvas>
+
+        <img id="pic">
     </div>
     <h2>WebSocket Test</h2>
     <div>
@@ -27,7 +29,8 @@
 var wsUri = "ws://localhost:8085";
 var output;
 var msg = document.getElementById("msg"),
-    sendBtn = document.getElementById("send");
+    sendBtn = document.getElementById("send"),
+    pic = document.getElementById("pic");
 
 
 
@@ -39,6 +42,7 @@ var canvasHeight = mainCanvas.height;
 var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
 
 var circles = new Array();
+var pictures = [];
 
 function Circle(initialX, initialY, radius) {
     this.radius = radius;
@@ -65,6 +69,22 @@ mainCanvas.addEventListener("mouseup", function(e) {
     doSend(JSON.stringify(new Command("circle", JSON.stringify(circles))));
 
 }, false);
+
+msg.addEventListener("change", function(e) {
+    if (this.files && this.files[0]) {
+        var FR = new FileReader();
+
+        FR.onload = function(e) {
+            console.log(e.target.result);
+            pictures.push(e.target.result);
+            doSend(JSON.stringify(new Command("picture", JSON.stringify(pictures))));
+        };
+
+        FR.readAsDataURL(this.files[0]);
+    }
+
+}, false);
+
 
 init();
 
@@ -107,27 +127,36 @@ function onClose(evt) {
 function onMessage(evt) {
     writeToScreen('<span style="color:blue;">RESPONSE:' + evt.data + '</span>');
 
-    var object = JSON.parse(evt.data);
+    try {
+        var object = JSON.parse(evt.data);
 
+        switch (object.name) {
+            case "circle":
+                var obj = JSON.parse(object.object);
 
-    switch (object.name) {
-        case "circle":
-            var obj = JSON.parse(object.object);
+                mainContext.clearRect(0, 0, canvasWidth, canvasHeight);
+                circles = new Array();
+                for (var i = 0; i < obj.length; i++) {
+                    var circle = new Circle(obj[i].initialX, obj[i].initialY, obj[i].radius);
+                    circles.push(circle);
+                    circle.update();
+                }
 
-            mainContext.clearRect(0, 0, canvasWidth, canvasHeight);
-            circles = new Array();
-            for (var i = 0; i < obj.length; i++) {
-                var circle = new Circle(obj[i].initialX, obj[i].initialY, obj[i].radius);
-                circles.push(circle);
-                circle.update();
-            }
+                break;
+            case "picture":
+                var obj = JSON.parse(object.object);
+                pictures = [];
+                for (var i = 0; i < obj.length; i++) {
 
-            break;
-        case "onlineNum":
-            break;
+                    pictures.push(obj[i]);
+                    pic.src = obj[i];
+                }   
+
+                break;
+        }
+    } catch (e) {
+
     }
-
-
 
 }
 
@@ -146,7 +175,6 @@ function writeToScreen(message) {
     pre.innerHTML = message;
     output.appendChild(pre);
 }
-
 
 function Command(name, object) {
     this.name = name;
