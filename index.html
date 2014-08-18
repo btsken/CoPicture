@@ -15,7 +15,7 @@
     </div>
     <h2>WebSocket Test</h2>
     <div>
-        <input type="text" id="msg">
+        <input type="file" id="msg">
         <button id="send">send</button>
     </div>
 
@@ -24,7 +24,7 @@
 
 </html>
 <script language="javascript" type="text/javascript">
-var wsUri = "ws://localhost:8081";
+var wsUri = "ws://localhost:8085";
 var output;
 var msg = document.getElementById("msg"),
     sendBtn = document.getElementById("send");
@@ -60,9 +60,9 @@ Circle.prototype.update = function() {
 mainCanvas.addEventListener("mouseup", function(e) {
     var circle = new Circle(e.pageX, e.pageY, 10);
     // circle.update();
-    // circles.push(circle);
+    circles.push(circle);
 
-    doSend(JSON.stringify(new Command("circle", JSON.stringify(circle))));
+    doSend(JSON.stringify(new Command("circle", JSON.stringify(circles))));
 
 }, false);
 
@@ -113,8 +113,15 @@ function onMessage(evt) {
     switch (object.name) {
         case "circle":
             var obj = JSON.parse(object.object);
-            var circle = new Circle(obj.initialX, obj.initialY, obj.radius);
-            circle.update();
+
+            mainContext.clearRect(0, 0, canvasWidth, canvasHeight);
+            circles = new Array();
+            for (var i = 0; i < obj.length; i++) {
+                var circle = new Circle(obj[i].initialX, obj[i].initialY, obj[i].radius);
+                circles.push(circle);
+                circle.update();
+            }
+
             break;
         case "onlineNum":
             break;

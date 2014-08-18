@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<!--
+Created using JS Bin
+http://jsbin.com
+
+Copyright (c) 2014 by anonymous (http://jsbin.com/ceboxasipovi/2/edit)
+
+Released under the MIT license: http://jsbin.mit-license.org
+-->
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>JS Bin</title>
+</head>
+<body>
+<canvas id="myCanvas2" style="position: absolute; left: 0; top: 0; z-index: 1;"></canvas>
+    <canvas id="myCanvas3" style="position: absolute; left: 0; top: 0; z-index: 2;"></canvas>
+   <br />
+  
+  <button id="save" style="margin-top:300px">save</button>
+<script id="jsbin-javascript">
+var canvas1 = document.getElementById("myCanvas2"),
+    canvas2 = document.getElementById("myCanvas3"),
+    saveBtn = document.getElementById("save");
+var context1 = canvas1.getContext('2d'),
+    context2 = canvas2.getContext('2d');
+
+function Circle(initialX, initialY, radius) {
+    this.radius = radius;
+    this.initialX = initialX;
+    this.initialY = initialY;
+}
+
+Circle.prototype.update = function(context) {
+    context.beginPath();
+    context.arc(this.initialX, this.initialY, this.radius, 0, 2 * Math.PI);
+    context.closePath();
+    context.fillStyle = 'rgba(177, 0, 129, 1)';
+    context.fill();
+};
+
+var circle1 = new Circle(10, 50, 10);
+circle1.update(context1);
+
+var circle2 = new Circle(50, 10, 10);
+circle2.update(context2);
+
+saveBtn.addEventListener("click", function(e) {
+    context1.drawImage(canvas2, 0, 0);
+					
+  // save image as png
+  var link = document.createElement('a');
+  link.download = "test.png";
+  link.href = canvas1.toDataURL("image/png").replace("image/png", "image/octet-stream");
+  link.click();
+
+  
+  
+}, false);
+</script>
+</body>
+</html>
