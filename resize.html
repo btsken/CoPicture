@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>JS Bin</title>
+</head>
+
+<body>
+    <canvas id="canvas" width=350 height=350></canvas>
+    <script id="jsbin-javascript">
+    var canvas = document.getElementById("canvas");
+    var ctx = canvas.getContext("2d");
+
+    var offsetX = canvas.offsetLeft;
+    var offsetY = canvas.offsetTop;
+
+    var startX;
+    var startY;
+    var isDown = false;
+
+    var pi2 = Math.PI * 2;
+    var resizerRadius = 8;
+    var rr = resizerRadius * resizerRadius;
+    var draggingResizer = {
+        x: 0,
+        y: 0
+    };
+
+    var imageX = 50;
+    var imageY = 50;
+    var imageWidth, imageHeight, imageRight, imageBottom;
+    var draggingImage = false;
+    var startX;
+    var startY;
+
+    var img = new Image();
+    img.onload = function() {
+        imageWidth = img.width;
+        imageHeight = img.height;
+        imageRight = imageX + imageWidth;
+        imageBottom = imageY + imageHeight;
+        draw(true, false);
+    };
+    img.src = "https://dl.dropboxusercontent.com/u/139992952/stackoverflow/facesSmall.png";
+
+
+
+    canvas.onmousedown = function(e) {
+
+        handleMouseDown(e);
+    };
+    canvas.onmousemove = function(e) {
+        handleMouseMove(e);
+    };
+    canvas.onmouseup = function(e) {
+        handleMouseUp(e);
+    };
+    canvas.onmouseout = function(e) {
+        handleMouseOut(e);
+    };
+    </script>
+</body>
+
+</html>

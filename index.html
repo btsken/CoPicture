@@ -6,16 +6,20 @@
     <title>WebSocket Test</title>
 
     <style type="text/css">
-    div,
-    section {
-        border: 5px solid;
-        border-radius: 4px;
+    * {
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+    }
+    .area {
+        border-top: 10px solid #d0f265;
     }
     .container {
         display: -webkit-flex;
         display: flex;
     }
     nav {
+        border-left: 10px solid #d0f265;
         width: 500px;
     }
     .flex-column {
@@ -23,95 +27,74 @@
         flex: 1;
     }
     canvas {
-        border: 1px solid red;
-        display:block;
+        /*border: 1px solid red;*/
+        display: block;
+        cursor: url(img/pen.png), auto;
+        ;
+    }
+    .container {
+        border: 10px solid #d0f265;
+        border-radius: 10px;
     }
     </style>
 
 </head>
 
 <body>
+
     <h1>PicCollage</h1>
     <div class="container">
 
         <div class="flex-column">
 
-            <section style="height:700px">
-                <canvas id="pictureLayer" height="700" width="1310" style="position: absolute; z-index: 1;"></canvas>
-                <canvas id="drawLayer" height="700" width="1310" style="position: absolute; z-index: 2;"></canvas>
+            <section class="canvas">
+                <canvas id="pictureLayer"></canvas>
+                <!--             <canvas id="drawLayer" height="700" width="1310" style="position: absolute; z-index: 2;"></canvas>
                 <canvas id="stickerLayer" height="700" width="1310" style="position: absolute;  z-index: 3;"></canvas>
-                <canvas id="textLayer" height="700" width="1310" style="position: absolute; z-index: 4;"></canvas>
+                <canvas id="textLayer" height="700" width="1310" style="position: absolute; z-index: 4;"></canvas> -->
             </section>
 
-            <section>
-                天布麼次，今親他利用或母電氣能真友老久來進登出總形：國大系思樂麼問做去將地樹作、維你我們，師為什那，會輕步省生一們些的間海學了；能大作以電回球地現廠美馬方，別到最刻親個神故靜西招國老北氣反大育發商告味必資始定可對謝度的！找謝對環的片他這下：母來感從還，叫我火教會經神送兒沒業是地場色是身收但進經道。媽兒們有先他怕雖發形的手最出在個是我不引最引現小企是而？一子很及女種走？他傳樣會當工視各過男二年傳，但式希叫裡上優經的友定你……不前空國會世解，也斯他不體裡一光車別？加去命最點著如推著人所間國作感我觀，可場是過入指待說，理求面輕美事福出過白到片不是的快究是漸片力男創北一落我成不，精能等動張色輪酒、吃理站毒上出一，黃時回趣吃然，意小童提，到苦際一出如遊軍現媽濟手喜……現結從過計不太聞經是她！變連事成通，中財陸呢十母裝有他成綠上童不個。
+            <section class="area">
+                <input type="file" id="msg">
             </section>
-
         </div>
-        <nav>
-            天布麼次，今親他利用或母電氣能真友老久來進登出總形：國大系思樂麼問做去將地樹作、維你我們，師為什那，會輕步省生一們些的間海學了；能大作以電回球地現廠美馬方，別到最刻親個神故靜西招國老北氣反大育發商告味必資始定可對謝度的！找謝對環的片他這下：母來感從還，叫我火教會經神送兒沒業是地場色是身收但進經道。媽兒們有先他怕雖發形的手最出在個是我不引最引現小企是而？一子很及女種走？他傳樣會當工視各過男二年傳，但式希叫裡上優經的友定你……不前空國會世解，也斯他不體裡一光車別？加去命最點著如推著人所間國作感我觀，可場是過入指待說，理求面輕美事福出過白到片不是的快究是漸片力男創北一落我成不，精能等動張色輪酒、吃理站毒上出一，黃時回趣吃然，意小童提，到苦際一出如遊軍現媽濟手喜……現結從過計不太聞經是她！變連事成通，中財陸呢十母裝有他成綠上童不個。
+        <nav class="">
+
         </nav>
     </div>
 
-
-
-
-
-
-
-
-    <!-- 
-    <div>
-        <canvas id="myCanvas" height="600" width="800">
-        </canvas>
-
-        <img id="pic">
-    </div>
-    <h2>WebSocket Test</h2>
-    <div>
-        <input type="file" id="msg">
-        <button id="send">send</button>
-    </div>
-
-    <div id="output"></div> -->
 </body>
 
 </html>
 <script language="javascript" type="text/javascript">
 var wsUri = "ws://localhost:8085";
-var output;
 var msg = document.getElementById("msg"),
-    sendBtn = document.getElementById("send"),
-    pic = document.getElementById("pic");
+    sendBtn = document.getElementById("send");
 
+var pictureLayer = document.getElementById("pictureLayer"),
+    drawLayer = document.getElementById("drawLayer"),
+    stickerLayer = document.getElementById("stickerLayer"),
+    textLayer = document.getElementById("textLayer");
 
+var mainContext = pictureLayer.getContext('2d');
 
-var mainCanvas = document.getElementById("pictureLayer");
-var mainContext = mainCanvas.getContext('2d');
-
-var canvasWidth = mainCanvas.width;
-var canvasHeight = mainCanvas.height;
-var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+var canvasWidth = pictureLayer.width;
+var canvasHeight = pictureLayer.height;
 
 var circles = new Array();
 var pictures = [];
 
-
-
-
 window.addEventListener('resize', resizeCanvas, false);
-        
-        function resizeCanvas() {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-                
-                /**
-                 * Your drawings need to be inside this function otherwise they will be reset when 
-                 * you resize the browser window and the canvas goes will be cleared.
-                 */
-                drawStuff(); 
-        }
-        resizeCanvas();
+
+function resizeCanvas() {
+    pictureLayer.width = window.innerWidth - 560;
+    pictureLayer.height = window.innerHeight * 0.8;
+    // drawLayer.width = window.innerWidth - 550;
+    // stickerLayer.width = window.innerWidth - 550;
+    // textLayer.width = window.innerWidth - 550;
+}
+resizeCanvas();
+init();
 
 function Circle(initialX, initialY, radius) {
     this.radius = radius;
@@ -130,8 +113,8 @@ Circle.prototype.update = function() {
 };
 
 
-mainCanvas.addEventListener("mouseup", function(e) {
-    var circle = new Circle(e.pageX, e.pageY, 10);
+pictureLayer.addEventListener("mouseup", function(e) {
+    var circle = new Circle(e.pageX - pictureLayer.offsetLeft + 15, e.pageY - pictureLayer.offsetTop + 40, 10);
     // circle.update();
     circles.push(circle);
 
@@ -156,12 +139,7 @@ msg.addEventListener("change", function(e) {
 
 
 function init() {
-    output = document.getElementById("output");
     testWebSocket();
-
-    sendBtn.addEventListener("click", function(e) {
-        doSend(msg.value);
-    }, false);
 }
 
 function testWebSocket() {
@@ -246,10 +224,10 @@ function doSend(message) {
 }
 
 function writeToScreen(message) {
-    var pre = document.createElement("p");
-    pre.style.wordWrap = "break-word";
-    pre.innerHTML = message;
-    output.appendChild(pre);
+    // var pre = document.createElement("p");
+    // pre.style.wordWrap = "break-word";
+    // pre.innerHTML = message;
+    // output.appendChild(pre);
 }
 
 function Command(name, object) {
