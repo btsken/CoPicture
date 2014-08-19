@@ -21,6 +21,7 @@ var image1Width, image1Height, image1Right, image1Bottom;
 var draggingImage = false;
 var startX;
 var startY;
+var isRotate = false;
 
 //photo focus 
 var photoFocus = -1;
@@ -49,36 +50,82 @@ Photos.prototype.drawDragAnchor = function() {
 
 Photos.prototype.drawBorder = function() {
     ctx.save();
+
+    var img = new Image();
+    img.src = "img/border.png";
+
+    ctx.translate(this.width / 2, this.height / 2);
+    ctx.translate(this.initialX, this.initialY);
     ctx.rotate(this.r);
-    ctx.beginPath();
-    ctx.strokeStyle = "#00ffff";
-    ctx.lineWidth = 1;
-    ctx.moveTo(this.initialX, this.initialY);
-    ctx.lineTo(this.Right, this.initialY);
-    ctx.lineTo(this.Right, this.Bottom);
-    ctx.lineTo(this.initialX, this.Bottom);
-    ctx.closePath();
-    ctx.stroke();
+    ctx.drawImage(img, -this.width / 2 - 5, -this.height / 2 - 5,
+        this.width + 10, this.height + 10);
     ctx.restore();
+    // ctx.rotate(this.r);
+    // ctx.beginPath();
+    // ctx.strokeStyle = "#00ffff";
+    // ctx.lineWidth = 1;
+    // ctx.moveTo(this.initialX, this.initialY);
+    // ctx.lineTo(this.Right, this.initialY);
+    // ctx.lineTo(this.Right, this.Bottom);
+    // ctx.lineTo(this.initialX, this.Bottom);
+    // ctx.closePath();
+    // ctx.stroke();
+    // ctx.restore();
 };
 
 Photos.prototype.drawRBAnchor = function() {
     var RB = new Image();
     RB.src = "img/operation.png";
-    // pictureContext.save();
-    // pictureContext.translate(this.initialX, this.initialY);
 
     ctx.drawImage(RB, this.Right - 25, this.Bottom - 25);
 
-    // pictureContext.restore();
+    // var radius = Math.sqrt(Math.pow(this.width / 2, 2), Math.pow(this.height / 2, 2));
+
+    // ctx.save();
+    // ctx.translate((this.initialX + this.width) / 2, (this.initialY + this.height) / 2);
+    // ctx.rotate(this.r);
+    // ctx.translate((this.initialX + this.width) / -2, (this.initialY + this.height) / -2);
+    // ctx.drawImage(RB, this.Right - RB.width / 2, this.Bottom - RB.height / 2);
+    // ctx.restore();
+
+
 };
+
+Photos.prototype.drawRotationHandle = function() {
+    ctx.save();
+    ctx.translate(this.initialX + this.width, this.initialY + this.height / 2);
+    ctx.rotate(this.r);
+    ctx.beginPath();
+    ctx.moveTo(0, -1);
+
+    var w = this.width / 2;
+    ctx.lineTo(w / 8 + 20, -1);
+    ctx.lineTo(w / 8 + 20, -7);
+    ctx.lineTo(w / 8 + 30, -7);
+    ctx.lineTo(w / 8 + 30, 7);
+    ctx.lineTo(w / 8 + 20, 7);
+    ctx.lineTo(w / 8 + 20, 1);
+    ctx.lineTo(0, 1);
+    ctx.closePath();
+    ctx.fillStyle = "blue";
+    ctx.fill();
+    ctx.restore();
+}
 
 Photos.prototype.drawTLAnchor = function() {
     var RB = new Image();
     RB.src = "img/delete.png";
+    var w = this.initialX - RB.width / 2,
+        h = this.initialY - RB.height / 2;
 
+    ctx.drawImage(RB, w, h);
 
-    ctx.drawImage(RB, this.initialX - 23, this.initialY - 20);
+    // ctx.save();
+    // ctx.translate((this.initialX + this.width) / 2, (this.initialY + this.height) / 2);
+    // ctx.rotate(this.r);
+    // ctx.translate((this.initialX + this.width) / -2, (this.initialY + this.height) / -2);
+    // ctx.drawImage(RB, w, h);
+    // ctx.restore();
 
 };
 
@@ -104,7 +151,7 @@ Photos.prototype.anchorHitTest = function(x, y) {
         dy = y - this.Bottom;
         if (dx * dx + dy * dy <= rr) {
             console.log("rotate");
-            return (4);
+            return (2);
         }
         // bottom-left
         dx = x - this.initialX;
@@ -125,14 +172,14 @@ function getPicObj(pic) {
 
 function drawRotatedImage(image, picObj) {
     pictureContext.save();
+    pictureContext.translate(picObj.width / 2, picObj.height / 2);
     pictureContext.translate(picObj.initialX, picObj.initialY);
 
-    // picObj.initialX += picObj.initialX;
-    // picObj.initialY += picObj.initialY;
-
     pictureContext.rotate(picObj.r);
-    // pictureContext.drawImage(image, -(picObj.width / 2), -(picObj.height / 2));
-    pictureContext.drawImage(image, 0, 0, picObj.width, picObj.height);
+    pictureContext.drawImage(image, -picObj.width / 2, -picObj.height / 2,
+        picObj.width, picObj.height);
+    // pictureContext.drawImage(image, 0, 0, picObj.width, picObj.height,
+    //     picObj.width / -4, picObj.height / -4, picObj.width / 2, picObj.height / 2);
     pictureContext.restore();
 }
 
@@ -152,11 +199,11 @@ function draw() {
                     if (photos[i].selected != -1) {
                         // obj, initialX, initialY, width, height, r, selected
                         var pic = getPicObj(photos[i]);
-                        // pic.drawBorder();
-                        pic.drawTLAnchor();
-                        pic.drawRBAnchor();
+                        pic.drawBorder();
+                        // pic.drawTLAnchor();
+                        // pic.drawRBAnchor();
+                        // pic.drawRotationHandle();
                     }
-
                     drawRotatedImage(imgList[i], photos[i]);
                 }
             }
@@ -298,6 +345,16 @@ function handleMouseMove(e) {
         draw(photoFocus, photoFocus);
     }
 }
+
+mouseLayer.onmousewheel = function(e) {
+    if (photoFocus != -1) {
+        console.log(e);
+        var wheel = e.wheelDelta / 120; //n or -n
+        var zoom = wheel / 10;
+        photos[photoFocus].r += zoom;
+        draw();
+    }
+};
 
 mouseLayer.onmousedown = function(e) {
     handleMouseDown(e);
