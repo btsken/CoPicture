@@ -4,39 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <title>WebSocket Test</title>
-
-    <style type="text/css">
-    * {
-        -webkit-box-sizing: border-box;
-        -moz-box-sizing: border-box;
-        box-sizing: border-box;
-    }
-    .area {
-        border-top: 10px solid #d0f265;
-    }
-    .container {
-        display: -webkit-flex;
-        display: flex;
-    }
-    nav {
-        border-left: 10px solid #d0f265;
-        width: 500px;
-    }
-    .flex-column {
-        -webkit-flex: 1;
-        flex: 1;
-    }
-    canvas {
-        /*border: 1px solid red;*/
-        display: block;
-        cursor: url(img/pen.png), auto;
-        ;
-    }
-    .container {
-        border: 10px solid #d0f265;
-        border-radius: 10px;
-    }
-    </style>
+    <link rel="stylesheet" href="css/style.css">
 
 </head>
 
@@ -46,19 +14,25 @@
     <div class="container">
 
         <div class="flex-column">
-
-            <section class="canvas">
-                <canvas id="pictureLayer"></canvas>
-                <!--             <canvas id="drawLayer" height="700" width="1310" style="position: absolute; z-index: 2;"></canvas>
-                <canvas id="stickerLayer" height="700" width="1310" style="position: absolute;  z-index: 3;"></canvas>
-                <canvas id="textLayer" height="700" width="1310" style="position: absolute; z-index: 4;"></canvas> -->
+            <section class="canvas" id="drawArea">
+                <canvas id="pictureLayer" style="z-index:1;"></canvas>
+                <canvas id="drawLayer" style="z-index:2;"></canvas>
+                <canvas id="stickerLayer" style="z-index:3;"></canvas>
+                <canvas id="textLayer" style="z-index:4;"></canvas>
+                <canvas id="mouseLayer" style="z-index:5;"></canvas>
             </section>
-
             <section class="area">
-                <input type="file" id="msg">
+                <button id="background"></button>
+                <button id="paint"></button>
+                <button id="sticker"></button>
+                <button id="text"></button>
+                <button id="download"></button>
+                <div id='file_browse_wrapper'>
+                    <input type='file' id='file_browse'>
+                </div>
             </section>
         </div>
-        <nav class="">
+        <nav class="nav">
 
         </nav>
     </div>
@@ -66,70 +40,60 @@
 </body>
 
 </html>
+<script type="text/javascript" src="js/oo.js"></script>
 <script language="javascript" type="text/javascript">
 var wsUri = "ws://localhost:8085";
-var msg = document.getElementById("msg"),
-    sendBtn = document.getElementById("send");
-
 var pictureLayer = document.getElementById("pictureLayer"),
     drawLayer = document.getElementById("drawLayer"),
     stickerLayer = document.getElementById("stickerLayer"),
-    textLayer = document.getElementById("textLayer");
+    textLayer = document.getElementById("textLayer"),
+    mouseLayer = document.getElementById("mouseLayer"),
+    file_browse = document.getElementById("file_browse"),
+    drawArea = document.getElementById("drawArea");
 
-var mainContext = pictureLayer.getContext('2d');
+var pictureContext = pictureLayer.getContext('2d'),
+    drawContext = drawLayer.getContext('2d'),
+    stickerContext = stickerLayer.getContext('2d'),
+    textContext = textLayer.getContext('2d'),
+    mouseContext = mouseLayer.getContext('2d');
 
 var canvasWidth = pictureLayer.width;
 var canvasHeight = pictureLayer.height;
 
-var circles = new Array();
-var pictures = [];
-
 window.addEventListener('resize', resizeCanvas, false);
 
 function resizeCanvas() {
-    pictureLayer.width = window.innerWidth - 560;
-    pictureLayer.height = window.innerHeight * 0.8;
-    // drawLayer.width = window.innerWidth - 550;
-    // stickerLayer.width = window.innerWidth - 550;
-    // textLayer.width = window.innerWidth - 550;
+    pictureLayer.width = window.innerWidth - 540;
+    pictureLayer.height = window.innerHeight - 280;
+    drawLayer.width = pictureLayer.width;
+    drawLayer.height = pictureLayer.height;
+    stickerLayer.width = pictureLayer.width;
+    stickerLayer.height = pictureLayer.height;
+    textLayer.width = pictureLayer.width;
+    textLayer.height = pictureLayer.height;
+    mouseLayer.width = pictureLayer.width;
+    mouseLayer.height = pictureLayer.height;
+    drawArea.style.height = pictureLayer.height + "px";
 }
 resizeCanvas();
 init();
 
-function Circle(initialX, initialY, radius) {
-    this.radius = radius;
-    this.initialX = initialX;
-    this.initialY = initialY;
-}
+mouseLayer.addEventListener("mouseup", function(e) {
 
-Circle.prototype.update = function() {
-
-    // The following code is responsible for actually drawing the circle on the screen
-    mainContext.beginPath();
-    mainContext.arc(this.initialX, this.initialY, this.radius, 0, 2 * Math.PI);
-    mainContext.closePath();
-    mainContext.fillStyle = 'rgba(177, 0, 129, 1)';
-    mainContext.fill();
-};
-
-
-pictureLayer.addEventListener("mouseup", function(e) {
-    var circle = new Circle(e.pageX - pictureLayer.offsetLeft + 15, e.pageY - pictureLayer.offsetTop + 40, 10);
-    // circle.update();
-    circles.push(circle);
-
-    doSend(JSON.stringify(new Command("circle", JSON.stringify(circles))));
 
 }, false);
 
-msg.addEventListener("change", function(e) {
+file_browse.addEventListener("change", function(e) {
     if (this.files && this.files[0]) {
         var FR = new FileReader();
 
         FR.onload = function(e) {
-            console.log(e.target.result);
-            pictures.push(e.target.result);
-            doSend(JSON.stringify(new Command("picture", JSON.stringify(pictures))));
+            var img = new Image();
+            img.src = e.target.result;
+            var photo = new Photos(e.target.result, 50, 50, img.width, img.height, 0, -1);
+            photos.push(photo);
+            // photos.push(e.target.result);
+            doSend(JSON.stringify(new Command("picture", JSON.stringify(photos))));
         };
 
         FR.readAsDataURL(this.files[0]);
@@ -137,40 +101,20 @@ msg.addEventListener("change", function(e) {
 
 }, false);
 
-
 function init() {
-    testWebSocket();
-}
-
-function testWebSocket() {
     websocket = new WebSocket(wsUri);
-    websocket.onopen = function(evt) {
-        onOpen(evt)
-    };
+    websocket.onopen = function(evt) {};
 
-    websocket.onclose = function(evt) {
-        onClose(evt)
-    };
+    websocket.onclose = function(evt) {};
 
     websocket.onmessage = function(evt) {
         onMessage(evt)
     };
 
-    websocket.onerror = function(evt) {
-        onError(evt)
-    };
-}
-
-function onOpen(evt) {
-    writeToScreen("CONNECTED");
-}
-
-function onClose(evt) {
-    writeToScreen("DISCONNECTED");
+    websocket.onerror = function(evt) {};
 }
 
 function onMessage(evt) {
-    writeToScreen('<span style="color:blue;">RESPONSE:' + evt.data + '</span>');
 
     try {
         var object = JSON.parse(evt.data);
@@ -179,7 +123,7 @@ function onMessage(evt) {
             case "circle":
                 var obj = JSON.parse(object.object);
 
-                mainContext.clearRect(0, 0, canvasWidth, canvasHeight);
+                pictureContext.clearRect(0, 0, canvasWidth, canvasHeight);
                 circles = new Array();
                 for (var i = 0; i < obj.length; i++) {
                     var circle = new Circle(obj[i].initialX, obj[i].initialY, obj[i].radius);
@@ -190,18 +134,18 @@ function onMessage(evt) {
                 break;
             case "picture":
                 var obj = JSON.parse(object.object);
-                pictures = [];
+                photos = [];
                 for (var i = 0; i < obj.length; i++) {
-
-                    pictures.push(obj[i]);
-                    // pic.src = obj[i];
-                    drawImg(obj[i]);
+                    photos.push(obj[i]);
+                    // drawImg(obj[i]);
                 }
+
+                draw(-1, -1, 0);
 
                 break;
         }
     } catch (e) {
-
+        // do nothing
     }
 
 }
@@ -209,25 +153,15 @@ function onMessage(evt) {
 function drawImg(src) {
     var img = new Image();
     img.onload = function() {
-        mainContext.drawImage(img, 0, 0);
+        pictureContext.drawImage(img, 0, 0);
     }
     img.src = src;
 }
 
-function onError(evt) {
-    writeToScreen('<span style="color:red;">ERROR:</span>' + evt.data);
-}
+function onError(evt) {}
 
 function doSend(message) {
-    writeToScreen("SENT: " + message);
     websocket.send(message);
-}
-
-function writeToScreen(message) {
-    // var pre = document.createElement("p");
-    // pre.style.wordWrap = "break-word";
-    // pre.innerHTML = message;
-    // output.appendChild(pre);
 }
 
 function Command(name, object) {

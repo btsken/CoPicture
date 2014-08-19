@@ -1,0 +1,86 @@
+* {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+.area {
+    text-align: center;
+    /*width: 165px;*/
+    border-top: 10px solid #d0f265;
+    /*height: 150px;*/
+}
+.container {
+    display: -webkit-flex;
+    display: flex;
+}
+.nav {
+    border-left: 10px solid #d0f265;
+    width: 500px;
+}
+.flex-column {
+    -webkit-flex: 1;
+    flex: 1;
+}
+canvas {
+    border: 1px solid red;
+    display: block;
+    /*cursor: url(../img/pen.png), auto;*/
+    position: absolute;
+}
+button {
+    margin: 15px;
+    background: none;
+    outline: 0;
+    border: 0;
+}
+.container {
+    border: 10px solid #d0f265;
+    border-radius: 10px;
+}
+#upload {
+    height: 128px;
+    width: 128px;
+    background-image: url(../img/icon7.png);
+}
+#background {
+    height: 128px;
+    width: 128px;
+    background-image: url(../img/icon2.png);
+}
+#paint {
+    height: 128px;
+    width: 128px;
+    background-image: url(../img/icon3.png);
+}
+#sticker {
+    height: 128px;
+    width: 128px;
+    background-image: url(../img/icon4.png);
+}
+#text {
+    height: 128px;
+    width: 128px;
+    background-image: url(../img/star.png);
+}
+#download {
+    height: 128px;
+    width: 128px;
+    background-image: url(../img/icon5.png);
+}
+#file_browse_wrapper {
+    width: 128px;
+    height: 128px;
+    background: url(../img/icon7.png) 0 0 no-repeat;
+    border: none;
+    /*margin: 10px;*/
+    display: inline-block;
+    overflow: hidden;
+}
+#file_browse {
+    /*margin-left: -145px;*/
+    height: 128px;
+    width: 128px;
+    opacity: 0;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+    filter: progid: DXImageTransform.Microsoft.Alpha(Opacity=0);
+}
