@@ -10,9 +10,11 @@ var ONLINE_NUM = "onlineNum",
     // TEMPLETE = "templete",
     // BACKGROUNF = "background",
     CIRCLE_ARY = "circle",
+    NEW_PICTURE = "newPicture",
     PICTURE = "picture";
 
 var circlelastMessage = "",
+    newPicturelastMessage = "",
     picturelastMessage = "";
 
 ws.broadcast = function(data) {
@@ -33,6 +35,9 @@ ws.on('connection', function(_ws) {
             case PICTURE:
                 picturelastMessage = message;
                 break;
+            case NEW_PICTURE:
+                newPicturelastMessage = message;
+                break;
         }
 
         ws.broadcast(message);
@@ -40,20 +45,25 @@ ws.on('connection', function(_ws) {
 
     var that = this;
     _ws.on('close', function() {
-        sendCommand(ONLINE_NUM, new Server(that.clients.length));
+        sendCommand(ONLINE_NUM, new Client(that.clients.length));
     });
 
-    sendCommand(ONLINE_NUM, new Server(this.clients.length));
+    sendCommand(ONLINE_NUM, new Client(this.clients.length));
+
+    // console.log(circlelastMessage);
+    // console.log(picturelastMessage);
+    // console.log(newPicturelastMessage);
 
     ws.broadcast(circlelastMessage);
     ws.broadcast(picturelastMessage);
+    ws.broadcast(newPicturelastMessage);
 });
 
 function sendCommand(commandName, object) {
     new Command(commandName, object).send();
 }
 
-function Server(clientNum) {
+function Client(clientNum) {
     this.clientNum = clientNum;
 }
 

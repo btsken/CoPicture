@@ -28,6 +28,65 @@ var photoFocus = -1;
 var tempFocus = -1;
 var photos = new Array();
 var tempphoto;
+var imgList = [];
+
+function PhotosNoBase64(initialX, initialY, width, height, r, selected) {
+    this.initialX = initialX;
+    this.initialY = initialY;
+    this.width = width;
+    this.height = height;
+    this.Right = initialX + this.width;
+    this.Bottom = initialY + this.height;
+    this.r = r;
+    this.selected = selected;
+}
+
+function drawNew() {
+    // clear the canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    imgList = [];
+    for (var j = 0; j < photos.length; j++) {
+        var img = new Image();
+        img.onload = function() {
+            if (imgList.length == photos.length) {
+                for (var i = 0; i < photos.length; i++) {
+                    drawRotatedImage(imgList[i], photos[i]);
+                    if (photos[i].selected != -1) {
+                        var pic = getPicObj(photos[i]);
+                        pic.drawBorder();
+                        pic.drawTLAnchor();
+                        pic.drawRBAnchor();
+                        // pic.drawRotationHandle();
+                    }
+
+                }
+            }
+        }
+        img.src = photos[j].obj;
+        imgList.push(img);
+    }
+}
+
+function draw() {
+    // clear the canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (var i = 0; i < photos.length; i++) {
+        var pic = new Photos(photos[i].obj, photos[i].initialX,
+            photos[i].initialY, photos[i].width, photos[i].height, photos[i].r, photos[i].selected);
+
+        if (pic.selected != -1) {
+            pic.drawBorder();
+        }
+        drawRotatedImage(imgList[i], photos[i]);
+        if (pic.selected != -1) {
+            pic.drawTLAnchor();
+            pic.drawRBAnchor();
+            // pic.drawRotationHandle();
+        }
+    }
+}
 
 function Photos(obj, initialX, initialY, width, height, r, selected) {
     this.obj = obj;
@@ -183,36 +242,6 @@ function drawRotatedImage(image, picObj) {
     pictureContext.restore();
 }
 
-function draw() {
-
-    // clear the canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    var imgList = [];
-    for (var j = 0; j < photos.length; j++) {
-        var img = new Image();
-        img.onload = function() {
-            if (imgList.length == photos.length) {
-                for (var i = 0; i < photos.length; i++) {
-
-
-                    if (photos[i].selected != -1) {
-                        // obj, initialX, initialY, width, height, r, selected
-                        var pic = getPicObj(photos[i]);
-                        pic.drawBorder();
-                        // pic.drawTLAnchor();
-                        // pic.drawRBAnchor();
-                        // pic.drawRotationHandle();
-                    }
-                    drawRotatedImage(imgList[i], photos[i]);
-                }
-            }
-        }
-        img.src = photos[j].obj;
-        imgList.push(img);
-    }
-}
-
 /* 0/1/2   photo0/photo1/photo2*/
 function hitImage(x, y) {
     for (var i = 0; i < photos.length; i++) {
@@ -260,7 +289,15 @@ function handleMouseDown(e) {
 function handleMouseUp(e) {
     draggingResizer = -1;
     draggingImage = -1;
-    doSend(JSON.stringify(new Command("picture", JSON.stringify(photos))));
+
+    var noBase64 = [];
+    for (var i = 0; i < photos.length; i++) {
+        var pic = new PhotosNoBase64(photos[i].initialX, photos[i].initialY,
+            photos[i].width, photos[i].height, photos[i].r, photos[i].selected);
+        noBase64.push(pic);
+    }
+    console.log(JSON.stringify(noBase64));
+    doSend(JSON.stringify(new Command("picture", JSON.stringify(noBase64))));
 }
 
 function handleMouseOut(e) {
@@ -346,15 +383,15 @@ function handleMouseMove(e) {
     }
 }
 
-mouseLayer.onmousewheel = function(e) {
-    if (photoFocus != -1) {
-        console.log(e);
-        var wheel = e.wheelDelta / 120; //n or -n
-        var zoom = wheel / 10;
-        photos[photoFocus].r += zoom;
-        draw();
-    }
-};
+// mouseLayer.onmousewheel = function(e) {
+//     if (photoFocus != -1) {
+//         // console.log(e);
+//         var wheel = e.wheelDelta / 120; //n or -n
+//         var zoom = wheel / 10;
+//         photos[photoFocus].r += zoom;
+//         draw();
+//     }
+// };
 
 mouseLayer.onmousedown = function(e) {
     handleMouseDown(e);
