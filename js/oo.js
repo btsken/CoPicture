@@ -656,16 +656,6 @@ function handleMouseMove(e) {
     }
 }
 
-// mouseLayer.onmousewheel = function(e) {
-//     if (photoFocus != -1) {
-//         // console.log(e);
-//         var wheel = e.wheelDelta / 120; //n or -n
-//         var zoom = wheel / 10;
-//         photos[photoFocus].r += zoom;
-//         draw();
-//     }
-// };
-
 mouseLayer.onmousedown = function(e) {
     if (modeFlag != 1) {
         handleMouseDown(e);

@@ -218,70 +218,75 @@ a:visited {
 }
 #bg1 {
     height: 100px;
-    width: 160px;
-    margin-left: 30px;
-    margin-top: 20px;
+    width: 100px;
+    margin: 10px;
+    /*margin-top: 20px;*/
     background-image: url(../img/background/bg1.jpg);
 }
 #bg2 {
     height: 100px;
-    width: 160px;
-    margin-top: 20px;
+    width: 100px;
+    margin: 10px;
     background-image: url(../img/background/bg2.jpg);
 }
 #bg3 {
     height: 100px;
-    width: 160px;
-    margin-left: 30px;
+    width: 100px;
+    margin: 10px;
     background-image: url(../img/background/bg3.jpg);
 }
 #bg4 {
     height: 100px;
-    width: 160px;
+    width: 100px;
+    margin: 10px;
     background-image: url(../img/background/bg4.jpg);
 }
 #bg5 {
     height: 100px;
-    width: 160px;
-    margin-left: 30px;
+    width: 100px;
+    margin: 10px;
     background-image: url(../img/background/bg5.jpg);
 }
 #bg6 {
     height: 100px;
-    width: 160px;
+    width: 100px;
+    margin: 10px;
     background-image: url(../img/background/bg6.jpg);
 }
 #bg7 {
     height: 100px;
-    width: 160px;
-    margin-left: 30px;
+    width: 100px;
+    margin: 10px;
     background-image: url(../img/background/bg7.jpg);
 }
 #bg8 {
     height: 100px;
-    width: 160px;
+    width: 100px;
+    margin: 10px;
     background-image: url(../img/background/bg8.jpg);
 }
 #bg9 {
     height: 100px;
-    width: 160px;
-    margin-left: 30px;
+    width: 100px;
+    margin: 10px;
     background-image: url(../img/background/bg9.jpg);
 }
 #bg10 {
     height: 100px;
-    width: 160px;
+    width: 100px;
+    margin: 10px;
     background-image: url(../img/background/bg10.jpg);
 }
 #bg11 {
     height: 100px;
-    width: 160px;
-    margin-left: 30px;
+    width: 100px;
+    margin: 10px;
     background-image: url(../img/background/bg11.jpg);
 }
 #bg12 {
     height: 100px;
-    width: 160px;
+    width: 100px;
+    margin: 10px;
     background-image: url(../img/background/bg12.jpg);
 }
 #size {

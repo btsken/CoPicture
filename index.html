@@ -203,6 +203,7 @@ paint.addEventListener("click", function(e) {
 }, false);
 
 function pensize(x) {
+
     lineWidth = x;
 }
 
@@ -222,7 +223,7 @@ function stickerclick(x) {
     var img = new Image();
     img.src = "img/stamps/" + x + ".png";
 
-    var photo = new Photos("img/stamps/" + x + ".png", 50 + Math.floor(Math.random() * (500)), 50 + Math.floor(Math.random() * (200)), img.width, img.height, 0, -1);
+    var photo = new Photos("img/stamps/" + x + ".png", 50 + Math.floor(Math.random() * (300)), 50 + Math.floor(Math.random() * (150)), img.width, img.height, 0, -1);
     photos.push(photo);
     doSend(JSON.stringify(new Command("newPicture", JSON.stringify(photos))));
 }
@@ -276,7 +277,7 @@ file_browse.addEventListener("change", function(e) {
         FR.onload = function(e) {
             var img = new Image();
             img.src = e.target.result;
-            var photo = new Photos(e.target.result, 50 + Math.floor(Math.random() * (1000)), 50 + Math.floor(Math.random() * (400)), img.width, img.height, 0, -1);
+            var photo = new Photos(e.target.result, 50 + Math.floor(Math.random() * (500)), 50 + Math.floor(Math.random() * (200)), img.width, img.height, 0, -1);
             photos.push(photo);
             // photos.push(e.target.result);
             doSend(JSON.stringify(new Command("newPicture", JSON.stringify(photos))));
@@ -449,6 +450,20 @@ function onMessage(evt) {
 
     }
 
+}
+
+document.onkeydown = function(e) {
+    console.log(e.keyCode);
+    if (modeFlag == 1) {
+        switch (e.keyCode) {
+            case 38:
+                lineWidth += 1;
+                break;
+            case 40:
+                lineWidth -= 1;
+                break;
+        }
+    }
 }
 
 function drawImg(src) {
