@@ -96,7 +96,7 @@ function drawNew() {
         var fontsize = textboxes[i].fontsize;
         var strFont = fontsize + "px Times New Roman bold";
         ctx.font = strFont;
-        ctx.fillStyle = usercolor[myid - 1];
+        ctx.fillStyle = '#000';
         ctx.fillText(textboxes[i].value, textboxes[i].initialX, textboxes[i].initialY, textboxes[i].width, textboxes[i].height);
         if (textObj.selected != -1) {
             textObj.drawTLAnchor();
@@ -145,7 +145,7 @@ function draw() {
         var fontsize = textboxes[i].fontsize;
         var strFont = fontsize + "px Times New Roman bold";
         ctx.font = strFont;
-        ctx.fillStyle = usercolor[myid - 1];
+        ctx.fillStyle = '#000';
         ctx.fillText(textboxes[i].value, textboxes[i].initialX, textboxes[i].initialY, textboxes[i].width, textboxes[i].height);
         if (textObj.selected != -1) {
             textObj.drawTLAnchor();

@@ -33,6 +33,7 @@ ws.on('connection', function(_ws) {
 
         switch (object.name) {
             case BACKGROUND:
+                console.log(message);
                 backgroundlastMessage = message;
                 break;
             case PICTURE:
