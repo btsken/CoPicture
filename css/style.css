@@ -28,7 +28,7 @@ body {
     background-image: url(../img/green.jpg);
 }
 #topbar {
-    width: 1800px;
+    width: 100%;
     height: 50px;
     margin-top: 20px;
     background-color: #38571b;
@@ -51,8 +51,8 @@ body {
     margin-right: 20px;
     border: 7px solid #365aeb;
     border-radius: 7px;
-    width: 420px;
-    height: 730px;
+    width: 25%;
+    /*height: 730px;*/
     overflow: auto;
 }
 .flex-column {
@@ -60,7 +60,7 @@ body {
     flex: 1;
 }
 canvas {
-    margin: 20px 0px 40px 40px;
+    margin: 20px 0px 40px 20px;
     display: block;
     /*cursor: url(../img/pen.png), auto;*/
     position: absolute;

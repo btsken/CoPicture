@@ -11,10 +11,13 @@ var ONLINE_NUM = "onlineNum",
     // BACKGROUNF = "background",
     CIRCLE_ARY = "circle",
     NEW_PICTURE = "newPicture",
+    BACKGROUND = "background",
+    TEXT = "text",
     PICTURE = "picture";
 
-var circlelastMessage = "",
+var backgroundlastMessage = "",
     newPicturelastMessage = "",
+    textlastMessage = "",
     picturelastMessage = "";
 
 ws.broadcast = function(data) {
@@ -29,14 +32,17 @@ ws.on('connection', function(_ws) {
         var object = JSON.parse(message);
 
         switch (object.name) {
-            case CIRCLE_ARY:
-                circlelastMessage = message;
+            case BACKGROUND:
+                backgroundlastMessage = message;
                 break;
             case PICTURE:
                 picturelastMessage = message;
                 break;
             case NEW_PICTURE:
                 newPicturelastMessage = message;
+                break;
+            case TEXT:
+                textlastMessage = message;
                 break;
         }
 
@@ -54,9 +60,10 @@ ws.on('connection', function(_ws) {
     // console.log(picturelastMessage);
     // console.log(newPicturelastMessage);
 
-    ws.broadcast(circlelastMessage);
+    ws.broadcast(backgroundlastMessage);
     ws.broadcast(picturelastMessage);
     ws.broadcast(newPicturelastMessage);
+    ws.broadcast(textlastMessage);
 });
 
 function sendCommand(commandName, object) {

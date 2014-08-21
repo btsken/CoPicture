@@ -110,8 +110,8 @@ var currentMouseX, currentMouseY;
 window.addEventListener('resize', resizeCanvas, false);
 
 function resizeCanvas() {
-    pictureLayer.width = window.innerWidth - 540;
-    pictureLayer.height = window.innerHeight - 280;
+    pictureLayer.width = window.innerWidth *0.70;
+    pictureLayer.height = window.innerHeight - 250;
     backgroundLayer.width = pictureLayer.width;
     backgroundLayer.height = pictureLayer.height;
     drawLayer.width = pictureLayer.width;
