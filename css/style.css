@@ -35,10 +35,11 @@ body {
 }
 .area {
     margin-top: 70px;
+    margin-right: 20px;
     padding-left: 35px;
     background-color: #38571b;
     opacity: 1;
-    width: 1400px;
+    width: 100%;
     height: 70px;
 }
 .container {
@@ -48,11 +49,10 @@ body {
 .nav {
     background-color: #38571b;
     margin-top: 20px;
-    margin-right: 20px;
     border: 7px solid #365aeb;
     border-radius: 7px;
     width: 25%;
-    /*height: 730px;*/
+    height: 700px;
     overflow: auto;
 }
 .flex-column {
@@ -137,12 +137,16 @@ button {
 
 }
 #downloadaa {
-    left: 450px;
-    top: 830px;
-    position: fixed;
-    z-index: 2;
+    /*left: 450px;*/
+    /*top: 830px;*/
+    /*position: fixed;*/
+    position: absolute;
+    z-index: 20;
     font-size: 20px;
     color:#ffffff;
+    height: 60px;
+    width:60px;
+    /*border: 2px solid;*/
 }
 a:active {
     color: #000000;
@@ -174,8 +178,9 @@ a:visited {
     /*margin: 10px;*/
     display: inline-block;
     overflow: hidden;
-    top:818px;
-    position: fixed;
+    margin-bottom: 5px;
+    /*top:818px;
+    position: fixed;*/
 }
 #file_browse {
     /*margin-left: -145px;*/

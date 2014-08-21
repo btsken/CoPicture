@@ -55,6 +55,10 @@ function drawNew() {
         img.onload = function() {
             if (imgList.length == photos.length) {
                 for (var i = 0; i < photos.length; i++) {
+
+                    var pic = new Photos(photos[i].obj, photos[i].initialX,
+                        photos[i].initialY, photos[i].width, photos[i].height, photos[i].r, photos[i].selected);
+
                     if (pic.selected != -1) {
                         if (i == photoFocus) {
                             pic.drawBorder(usercolor[myid - 1]);
@@ -128,7 +132,6 @@ function draw() {
         var textObj = new Textboxes(textboxes[i].fontsize, textboxes[i].value,
             textboxes[i].initialX, textboxes[i].initialY, textboxes[i].width,
             textboxes[i].height, textboxes[i].selected);
-
 
         if (textObj.selected != -1) {
 

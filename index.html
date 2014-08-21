@@ -16,7 +16,7 @@
     <div id="slidebar">
         <input id="size" type="range" min="2" max="30" onchange="pensize(this.value)" />
     </div>
-    <a id="downloadaa">...</a>
+
     <div class="container">
 
         <div class="flex-column">
@@ -28,13 +28,26 @@
                 <canvas id="textLayer" style="z-index:4;"></canvas>
                 <canvas id="mouseLayer" style="z-index:5;"></canvas>
             </section>
-           <section class="area">
-                <div id = "fixposition"> <button id="background"></button></div>
-                <div id = "fixposition"> <button id="paint"></button></div>
-                <div id = "fixposition"> <button id="sticker"></button></div>
-                <div id = "fixposition"> <button id="textBtn"></button></div>
-                <div id = "fixposition"><button id="filter"></button></div>
-                <div id = "fixposition"><button id="download"></button></div>
+            <section class="area">
+                <div id="fixposition">
+                    <button id="background"></button>
+                </div>
+                <div id="fixposition">
+                    <button id="paint"></button>
+                </div>
+                <div id="fixposition">
+                    <button id="sticker"></button>
+                </div>
+                <div id="fixposition">
+                    <button id="textBtn"></button>
+                </div>
+                <div id="fixposition">
+                    <button id="filter"></button>
+                </div>
+                <div id="fixposition">
+                    <a id="downloadaa"></a>
+                    <button id="download"></button>
+                </div>
                 <div id='file_browse_wrapper'>
                     <input type='file' id='file_browse'>
                 </div>
@@ -110,7 +123,7 @@ var currentMouseX, currentMouseY;
 window.addEventListener('resize', resizeCanvas, false);
 
 function resizeCanvas() {
-    pictureLayer.width = window.innerWidth *0.70;
+    pictureLayer.width = window.innerWidth * 0.70;
     pictureLayer.height = window.innerHeight - 250;
     backgroundLayer.width = pictureLayer.width;
     backgroundLayer.height = pictureLayer.height;
@@ -197,8 +210,6 @@ function pensize(x) {
 function colorclick(x) {
     hex = color[x];
     document.getElementById("slidebar").style.backgroundColor = hex;
-
-
 }
 
 function bgclick(x) {
@@ -279,14 +290,28 @@ file_browse.addEventListener("change", function(e) {
 function downloadCanvas(link, canvasId, filename) {
     link.href = document.getElementById(canvasId).toDataURL();
     link.download = filename;
+
+    // var link = document.createElement('a');
+    // link.download = "test.png";
+    // link.href = canvas1.toDataURL("image/png").replace("image/png", "image/octet-stream");
+    // link.click();
 }
 document.getElementById('downloadaa').addEventListener('click', function() {
+    // 
     stickerContext.drawImage(textLayer, 0, 0);
     drawContext.drawImage(stickerLayer, 0, 0);
     pictureContext.drawImage(drawLayer, 0, 0);
     backgroundContext.drawImage(pictureLayer, 0, 0);
-    //backgroundContext.drawImage(pictureLayer, 0, 0); 
     downloadCanvas(this, 'backgroundLayer', 'test.png');
+
+    // var link = document.createElement('a');
+    // link.download = "test.png";
+    // link.href = backgroundLayer.toDataURL("image/png").replace("image/png", "image/octet-stream");
+    // link.click();
+    // alert(321);
+    // this.link.href = backgroundLayer.toDataURL();
+    // this.link.download = filename;
+
 }, false);
 
 function mousemoveandler(e) {
