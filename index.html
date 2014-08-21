@@ -9,50 +9,70 @@
 </head>
 
 <body>
-
-    <h1>PicCollage</h1>
+    <div id="topbar">
+        <img src="img/top.png" height="48" width="48">
+        <h1>PicCollage</h1>
+    </div>
+    <div id="slidebar">
+        <input id="size" type="range" min="2" max="30" onchange="pensize(this.value)" />
+    </div>
+    <a id="downloadaa">...</a>
     <div class="container">
 
         <div class="flex-column">
             <section class="canvas" id="drawArea">
+                <canvas id="backgroundLayer" style="z-index:0;"></canvas>
                 <canvas id="pictureLayer" style="z-index:1;"></canvas>
                 <canvas id="drawLayer" style="z-index:2;"></canvas>
                 <canvas id="stickerLayer" style="z-index:3;"></canvas>
                 <canvas id="textLayer" style="z-index:4;"></canvas>
                 <canvas id="mouseLayer" style="z-index:5;"></canvas>
             </section>
-            <section class="area">
-                <button id="background"></button>
-                <button id="paint"></button>
-                <button id="sticker"></button>
-                <button id="text"></button>
-                <button id="download"></button>
+           <section class="area">
+                <div id = "fixposition"> <button id="background"></button></div>
+                <div id = "fixposition"> <button id="paint"></button></div>
+                <div id = "fixposition"> <button id="sticker"></button></div>
+                <div id = "fixposition"> <button id="textBtn"></button></div>
+                <div id = "fixposition"><button id="filter"></button></div>
+                <div id = "fixposition"><button id="download"></button></div>
                 <div id='file_browse_wrapper'>
                     <input type='file' id='file_browse'>
                 </div>
             </section>
         </div>
-        <nav class="nav">
+        <nav class="nav" id="nav">
 
         </nav>
     </div>
 
+    <div id="text_template">
+        <div>
+            <input id="input_textbox" type="text" autofocus placeholder="請輸入文字">
+        </div>
+        <input id="input_confirm" type="button" value="確定" onclick="input_confirm();">
+        <input id="input_cancel" type="button" value="取消" onclick="input_cancel();">
+    </div>
 </body>
 
 </html>
 <script type="text/javascript" src="js/oo.js"></script>
+<script type="text/javascript" src="js/Textbox.js"></script>
 <script language="javascript" type="text/javascript">
-var wsUri = "ws://localhost:8085";
+//var wsUri = "ws://localhost:8085";
+var wsUri = "ws://192.168.33.5:8085";
 var pictureLayer = document.getElementById("pictureLayer"),
     drawLayer = document.getElementById("drawLayer"),
     stickerLayer = document.getElementById("stickerLayer"),
     textLayer = document.getElementById("textLayer"),
     mouseLayer = document.getElementById("mouseLayer"),
+    backgroundLayer = document.getElementById("backgroundLayer"),
     file_browse = document.getElementById("file_browse"),
+    textBtn = document.getElementById("textBtn"),
     drawArea = document.getElementById("drawArea");
 
 var pictureContext = pictureLayer.getContext('2d'),
     drawContext = drawLayer.getContext('2d'),
+    backgroundContext = backgroundLayer.getContext('2d'),
     stickerContext = stickerLayer.getContext('2d'),
     textContext = textLayer.getContext('2d'),
     mouseContext = mouseLayer.getContext('2d');
@@ -60,11 +80,40 @@ var pictureContext = pictureLayer.getContext('2d'),
 var canvasWidth = pictureLayer.width;
 var canvasHeight = pictureLayer.height;
 
+var drawMode;
+var hex;
+var lineWidth = 10;
+var modeFlag = 0;
+var myid = 0,
+    alluser = 0;
+
+function Point(initialX, initialY, afterX, afterY, width, color) {
+    this.width = width;
+    this.initialX = initialX;
+    this.initialY = initialY;
+    this.afterX = afterX;
+    this.afterY = afterY;
+    this.color = color;
+    this.draw = function(ctx) {
+        ctx.beginPath();
+        ctx.lineCap = "round";
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.moveTo(initialX, initialY);
+        ctx.lineTo(afterX, afterY);
+        ctx.stroke();
+    };
+
+}
+
+var currentMouseX, currentMouseY;
 window.addEventListener('resize', resizeCanvas, false);
 
 function resizeCanvas() {
     pictureLayer.width = window.innerWidth - 540;
     pictureLayer.height = window.innerHeight - 280;
+    backgroundLayer.width = pictureLayer.width;
+    backgroundLayer.height = pictureLayer.height;
     drawLayer.width = pictureLayer.width;
     drawLayer.height = pictureLayer.height;
     stickerLayer.width = pictureLayer.width;
@@ -78,9 +127,135 @@ function resizeCanvas() {
 resizeCanvas();
 init();
 
-mouseLayer.addEventListener("mouseup", function(e) {
+color = ["#FFFFFF", "#BEBEBE", "#9D9D9D", "#8E8E8E", "#6C6C6C", "#3C3C3C", "#272727", "#000000",
+    "#FFB5B5", "#ff7575", "#FF2D2D", "#EA0000", "#AE0000", "#750000", "#4D0000", "#2F0000",
+    "#FFC1E0", "#FF79BC", "#FF60AF", "#FF359A", "#FF0080", "#D9006C", "#9F0050", "#600030",
+    "#E6CAFF", "#BE77FF", "#9F35FF", "#8600FF", "#5B00AE", "#5B00AE", "#3A006F", "#28004D",
+    "#CECEFF", "#7D7DFF", "#6A6AFF", "#4A4AFF", "#2828FF", "#0000E3", "#0000C6", "#000079",
+    "#CAFFFF", "#4DFFFF", "#00E3E3", "#00AEAE", "#009393", "#007979", "#005757", "#003E3E",
+    "#C1FFE4", "#4EFEB3", "#02F78E", "#02DF82", "#02C874", "#01B468", "#019858", "#006030",
+    "#FFFFAA", "#FFFF6F", "#FFFF37", "#F9F900", "#E1E100", "#A6A600", "#8C8C00", "#737300",
+    "#FFD1A4", "#FFBB77", "#FFA042", "#FF9224", "#FF8000", "#D26900", "#9F5000", "#844200",
+    "#FFCBB3", "#FF9D6F", "#FF8F59", "#FF8040", "#BB3D00", "#A23400", "#842B00", "#642100",
+
+];
+usercolor = ["#ed0e3b", "#ffff00", "#0084ff", "#00ff66", "#ff9900", "#00ffcc"];
+
+function onlineusers(id, num) {
+
+    var list = document.getElementById("topbar");
+    var result;
+    result = "<img src='img/top.png' height='48' width='48'><h1>PicCollage</h1>";
+
+    for (var i = 0; i < num; i++) {
+        if (id - 1 == i) result += "<button id='manid'  style='background-color:" + usercolor[i] + ";'></button>";
+        else result += "<button id='man'  style='background-color:" + usercolor[i] + ";'></button>";
+    }
+    list.innerHTML = result;
+}
+/*mouseLayer.addEventListener("mouseup", function(e) {
 
 
+}, false);*/
+mouseLayer.addEventListener('mousemove', mousemoveandler, false);
+mouseLayer.addEventListener('mousedown', mousedown, false);
+mouseLayer.addEventListener('mouseup', mouseup, false);
+
+
+background.addEventListener("click", function(e) {
+    modeFlag = 0;
+
+    var list = document.getElementById("nav");
+    var result = "<div id = 'navh2'>Background</div>";
+    result += "<button id='bg1' onClick ='bgclick(1)'></button><button id='bg2' onClick ='bgclick(2)'></button><button id='bg3' onClick ='bgclick(3)'></button><button id='bg4' onClick ='bgclick(4)'></button>";
+    result += "<button id='bg5' onClick ='bgclick(5)'></button><button id='bg6' onClick ='bgclick(6)'></button><button id='bg7' onClick ='bgclick(7)'></button><button id='bg8' onClick ='bgclick(8)'></button>";
+    result += "<button id='bg9' onClick ='bgclick(9)'></button><button id='bg10' onClick ='bgclick(10)'></button><button id='bg11' onClick ='bgclick(11)'></button><button id='bg12' onClick ='bgclick(12)'></button>";
+    list.innerHTML = result;
+    document.getElementById("size").style.visibility = "hidden";
+    document.getElementById("slidebar").style.visibility = "hidden";
+}, false);
+
+paint.addEventListener("click", function(e) {
+
+    modeFlag = 1;
+    var list = document.getElementById("nav");
+
+    var result = "<div id = 'navh2'>pen</div>";
+    for (var i = 0; i < 64; i++)
+        result += "<button id='color'  style='background-color:" + color[i] + ";color:" + color[i] + "'  onClick = 'colorclick(" + i + ")'>...</button>";
+
+    list.innerHTML = result;
+    document.getElementById("size").style.visibility = "visible";
+    document.getElementById("slidebar").style.visibility = "visible";
+}, false);
+
+function pensize(x) {
+    lineWidth = x;
+}
+
+
+function colorclick(x) {
+    hex = color[x];
+    document.getElementById("slidebar").style.backgroundColor = hex;
+
+
+}
+
+function bgclick(x) {
+
+    // drawImg("img/background/bg" + x + ".jpg");
+    doSend(JSON.stringify(new Command("background", "img/background/bg" + x + ".jpg")));
+}
+
+function stickerclick(x) {
+    var img = new Image();
+    img.src = "img/stamps/" + x + ".png";
+
+    var photo = new Photos("img/stamps/" + x + ".png", 50 + Math.floor(Math.random() * (500)), 50 + Math.floor(Math.random() * (200)), img.width, img.height, 0, -1);
+    photos.push(photo);
+    doSend(JSON.stringify(new Command("newPicture", JSON.stringify(photos))));
+}
+sticker.addEventListener("click", function(e) {
+    modeFlag = 0;
+    var list = document.getElementById("nav");
+
+    var result = "<div id = 'navh2'>sticker</div>";
+    for (var i = 1; i < 66; i++)
+        result += "<button id='stamps'   style='background: url(img/stamps/" + i + ".png) no-repeat;'' onClick = 'stickerclick(" + i + ")'></button>";
+
+    list.innerHTML = result;
+    document.getElementById("size").style.visibility = "hidden";
+    document.getElementById("slidebar").style.visibility = "hidden";
+}, false);
+
+textBtn.addEventListener("click", function(e) {
+    modeFlag = 0;
+    // var list = document.getElementById("nav");
+
+    // var result = "<div id = 'navh2'>文字</div>";
+
+
+    // list.innerHTML = result;
+    // document.getElementById("size").style.visibility = "hidden";
+    // document.getElementById("slidebar").style.visibility = "hidden";
+    input_text();
+}, false);
+
+function filterclick(x) {
+    //drawImg("");
+    //send
+}
+filter.addEventListener("click", function(e) {
+    modeFlag = 0;
+    var list = document.getElementById("nav");
+
+    var result = "<div id = 'navh2'>filter</div>";
+    for (var i = 1; i < 9; i++)
+        result += "<button id='filterpic'   style='background: url(img/filter/" + i + ".jpg) no-repeat;'' onClick = 'filterclick(" + i + ")'></button>";
+
+    list.innerHTML = result;
+    document.getElementById("size").style.visibility = "hidden";
+    document.getElementById("slidebar").style.visibility = "hidden";
 }, false);
 
 file_browse.addEventListener("change", function(e) {
@@ -90,7 +265,7 @@ file_browse.addEventListener("change", function(e) {
         FR.onload = function(e) {
             var img = new Image();
             img.src = e.target.result;
-            var photo = new Photos(e.target.result, 50, 50, img.width, img.height, 0, -1);
+            var photo = new Photos(e.target.result, 50 + Math.floor(Math.random() * (1000)), 50 + Math.floor(Math.random() * (400)), img.width, img.height, 0, -1);
             photos.push(photo);
             // photos.push(e.target.result);
             doSend(JSON.stringify(new Command("newPicture", JSON.stringify(photos))));
@@ -100,6 +275,75 @@ file_browse.addEventListener("change", function(e) {
     }
 
 }, false);
+
+function downloadCanvas(link, canvasId, filename) {
+    link.href = document.getElementById(canvasId).toDataURL();
+    link.download = filename;
+}
+document.getElementById('downloadaa').addEventListener('click', function() {
+    stickerContext.drawImage(textLayer, 0, 0);
+    drawContext.drawImage(stickerLayer, 0, 0);
+    pictureContext.drawImage(drawLayer, 0, 0);
+    backgroundContext.drawImage(pictureLayer, 0, 0);
+    //backgroundContext.drawImage(pictureLayer, 0, 0); 
+    downloadCanvas(this, 'backgroundLayer', 'test.png');
+}, false);
+
+function mousemoveandler(e) {
+    if (modeFlag == 1) {
+
+        mouseLayer.className += " penCursor";
+
+        var rect = pictureLayer.getBoundingClientRect();
+        var mouseX = e.clientX - rect.left + 20;
+        var mouseY = e.clientY - rect.top + 40;
+        if (drawMode) {
+            var point = new Point(currentMouseX, currentMouseY, mouseX, mouseY, lineWidth, hex);
+            // Draw it on the background canvas.
+            point.draw(drawContext);
+
+            // Send it to the sever.
+            //pushPath(point);
+            websocket.send(JSON.stringify(new Command("point", JSON.stringify(point))));
+
+            // Refresh old coordinates
+            currentMouseX = mouseX;
+            currentMouseY = mouseY;
+        }
+    } else {
+        mouseLayer.className = mouseLayer.className.replace(/\ penCursor/g, "");
+    }
+}
+
+function mouseup(e) {
+
+    if (modeFlag == 1) {
+        var rect = pictureLayer.getBoundingClientRect();
+        var mouseX = e.clientX - rect.left + 20;
+        var mouseY = e.clientY - rect.top + 40;
+        var point = new Point(currentMouseX, currentMouseY, mouseX, mouseY, lineWidth, hex);
+        point.draw(drawContext);
+        // Send it to the sever.
+        //pushPath(point);
+        websocket.send(JSON.stringify(new Command("point", JSON.stringify(point))));
+
+        // Refresh old coordinates
+        currentMouseX = mouseX;
+        currentMouseY = mouseY;
+
+        drawMode = false;
+        drawContext.closePath();
+    }
+}
+
+function mousedown(e) {
+    if (modeFlag == 1) {
+        var rect = pictureLayer.getBoundingClientRect();
+        currentMouseX = e.clientX - rect.left + 20;
+        currentMouseY = e.clientY - rect.top + 40;
+        drawMode = true;
+    }
+}
 
 function init() {
     websocket = new WebSocket(wsUri);
@@ -118,18 +362,12 @@ function onMessage(evt) {
 
     try {
         var object = JSON.parse(evt.data);
-
         switch (object.name) {
-            case "circle":
+            case "point":
                 var obj = JSON.parse(object.object);
 
-                pictureContext.clearRect(0, 0, canvasWidth, canvasHeight);
-                circles = new Array();
-                for (var i = 0; i < obj.length; i++) {
-                    var circle = new Circle(obj[i].initialX, obj[i].initialY, obj[i].radius);
-                    circles.push(circle);
-                    circle.update();
-                }
+                var point = new Point(obj.initialX, obj.initialY, obj.afterX, obj.afterY, obj.width, obj.color);
+                point.draw(drawContext);
 
                 break;
             case "picture":
@@ -149,6 +387,7 @@ function onMessage(evt) {
                 break;
             case "newPicture":
                 var obj = JSON.parse(object.object);
+                console.log(obj);
                 photos = [];
                 for (var i = 0; i < obj.length; i++) {
                     photos.push(obj[i]);
@@ -157,11 +396,32 @@ function onMessage(evt) {
                 drawNew();
                 break;
             case "onlineNum":
-            
+
+                if (myid == 0) {
+                    myid = object.object.clientNum;
+                    alluser = object.object.clientNum;
+                } else alluser = object.object.clientNum;
+                //alert(myid);
+                onlineusers(myid, alluser);
+
+                break;
+
+            case "background":
+                drawImg(object.object);
+                break;
+            case "text":
+                var obj = JSON.parse(object.object);
+                console.log(obj);
+                textboxes = [];
+                for (var i = 0; i < obj.length; i++) {
+                    textboxes.push(obj[i]);
+                }
+
+                draw();
                 break;
         }
     } catch (e) {
-        // do nothing
+
     }
 
 }
@@ -169,7 +429,7 @@ function onMessage(evt) {
 function drawImg(src) {
     var img = new Image();
     img.onload = function() {
-        pictureContext.drawImage(img, 0, 0);
+        backgroundContext.drawImage(img, 0, 0, backgroundLayer.width, backgroundLayer.height);
     }
     img.src = src;
 }

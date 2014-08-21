@@ -19,6 +19,8 @@ var draggingResizer = {
 var imageWidth, imageHeight, imageRight, imageBottom;
 var image1Width, image1Height, image1Right, image1Bottom;
 var draggingImage = false;
+var draggingText = false;
+var draggingTextResizer = -1;
 var startX;
 var startY;
 var isRotate = false;
@@ -26,7 +28,9 @@ var isRotate = false;
 //photo focus 
 var photoFocus = -1;
 var tempFocus = -1;
+var textboxFocus = -1;
 var photos = new Array();
+var textboxes = [];
 var tempphoto;
 var imgList = [];
 
@@ -51,20 +55,49 @@ function drawNew() {
         img.onload = function() {
             if (imgList.length == photos.length) {
                 for (var i = 0; i < photos.length; i++) {
+                    if (pic.selected != -1) {
+                        if (i == photoFocus) {
+                            pic.drawBorder(usercolor[myid - 1]);
+                        } else {
+                            pic.drawBorder();
+                        }
+                    }
                     drawRotatedImage(imgList[i], photos[i]);
-                    if (photos[i].selected != -1) {
-                        var pic = getPicObj(photos[i]);
-                        pic.drawBorder();
+                    if (pic.selected != -1) {
                         pic.drawTLAnchor();
                         pic.drawRBAnchor();
-                        // pic.drawRotationHandle();
                     }
-
                 }
             }
         }
         img.src = photos[j].obj;
         imgList.push(img);
+    }
+
+    for (var i = 0; i < textboxes.length; i++) {
+        var textObj = new Textboxes(textboxes[i].fontsize, textboxes[i].value,
+            textboxes[i].initialX, textboxes[i].initialY, textboxes[i].width,
+            textboxes[i].height, textboxes[i].selected);
+
+
+        if (textObj.selected != -1) {
+
+            if (i == textboxFocus) {
+                textObj.drawBorder(usercolor[myid - 1]);
+            } else {
+                textObj.drawBorder();
+            }
+
+        }
+        var fontsize = textboxes[i].fontsize;
+        var strFont = fontsize + "px Times New Roman bold";
+        ctx.font = strFont;
+        ctx.fillStyle = usercolor[myid - 1];
+        ctx.fillText(textboxes[i].value, textboxes[i].initialX, textboxes[i].initialY, textboxes[i].width, textboxes[i].height);
+        if (textObj.selected != -1) {
+            textObj.drawTLAnchor();
+            textObj.drawRBAnchor();
+        }
     }
 }
 
@@ -77,13 +110,43 @@ function draw() {
             photos[i].initialY, photos[i].width, photos[i].height, photos[i].r, photos[i].selected);
 
         if (pic.selected != -1) {
-            pic.drawBorder();
+            if (i == photoFocus) {
+                pic.drawBorder(usercolor[myid - 1]);
+            } else {
+                pic.drawBorder();
+            }
         }
         drawRotatedImage(imgList[i], photos[i]);
         if (pic.selected != -1) {
             pic.drawTLAnchor();
             pic.drawRBAnchor();
-            // pic.drawRotationHandle();
+        }
+    }
+
+    for (var i = 0; i < textboxes.length; i++) {
+        //Textboxes(size, value, x, y, width, height, selected)
+        var textObj = new Textboxes(textboxes[i].fontsize, textboxes[i].value,
+            textboxes[i].initialX, textboxes[i].initialY, textboxes[i].width,
+            textboxes[i].height, textboxes[i].selected);
+
+
+        if (textObj.selected != -1) {
+
+            if (i == textboxFocus) {
+                textObj.drawBorder(usercolor[myid - 1]);
+            } else {
+                textObj.drawBorder();
+            }
+
+        }
+        var fontsize = textboxes[i].fontsize;
+        var strFont = fontsize + "px Times New Roman bold";
+        ctx.font = strFont;
+        ctx.fillStyle = usercolor[myid - 1];
+        ctx.fillText(textboxes[i].value, textboxes[i].initialX, textboxes[i].initialY, textboxes[i].width, textboxes[i].height);
+        if (textObj.selected != -1) {
+            textObj.drawTLAnchor();
+            textObj.drawRBAnchor();
         }
     }
 }
@@ -107,29 +170,33 @@ Photos.prototype.drawDragAnchor = function() {
     ctx.fill();
 };
 
-Photos.prototype.drawBorder = function() {
-    ctx.save();
+Photos.prototype.drawBorder = function(color) {
+    // ctx.save();
 
-    var img = new Image();
-    img.src = "img/border.png";
+    // var img = new Image();
+    // img.src = "img/border.png";
 
-    ctx.translate(this.width / 2, this.height / 2);
-    ctx.translate(this.initialX, this.initialY);
-    ctx.rotate(this.r);
-    ctx.drawImage(img, -this.width / 2 - 5, -this.height / 2 - 5,
-        this.width + 10, this.height + 10);
-    ctx.restore();
+    // ctx.translate(this.width / 2, this.height / 2);
+    // ctx.translate(this.initialX, this.initialY);
     // ctx.rotate(this.r);
-    // ctx.beginPath();
-    // ctx.strokeStyle = "#00ffff";
-    // ctx.lineWidth = 1;
-    // ctx.moveTo(this.initialX, this.initialY);
-    // ctx.lineTo(this.Right, this.initialY);
-    // ctx.lineTo(this.Right, this.Bottom);
-    // ctx.lineTo(this.initialX, this.Bottom);
-    // ctx.closePath();
-    // ctx.stroke();
+    // ctx.drawImage(img, -this.width / 2 - 5, -this.height / 2 - 5,
+    //     this.width + 10, this.height + 10);
     // ctx.restore();
+
+    ctx.beginPath();
+    if (arguments.length == 1) {
+        ctx.strokeStyle = color;
+    } else {
+        ctx.strokeStyle = '#000000';
+    }
+
+    ctx.lineWidth = 3;
+    ctx.moveTo(this.initialX, this.initialY);
+    ctx.lineTo(this.Right, this.initialY);
+    ctx.lineTo(this.Right, this.Bottom);
+    ctx.lineTo(this.initialX, this.Bottom);
+    ctx.closePath();
+    ctx.stroke();
 };
 
 Photos.prototype.drawRBAnchor = function() {
@@ -224,6 +291,82 @@ Photos.prototype.anchorHitTest = function(x, y) {
     }
 };
 
+function anchorHitTest(x, y) {
+
+    var dx, dy;
+
+    if (photoFocus >= 0) {
+        // top-left
+        dx = x - photos[photoFocus].initialX;
+        dy = y - photos[photoFocus].initialY;
+
+        if (dx * dx + dy * dy <= rr) {
+            return (0);
+        }
+        // top-right
+        dx = x - photos[photoFocus].Right;
+        dy = y - photos[photoFocus].initialY;
+        if (dx * dx + dy * dy <= rr) {
+            return (1);
+        }
+        // bottom-right
+        dx = x - photos[photoFocus].Right;
+        dy = y - photos[photoFocus].Bottom;
+        if (dx * dx + dy * dy <= rr) {
+            return (2);
+        }
+        // bottom-left
+        dx = x - photos[photoFocus].initialX;
+        dy = y - photos[photoFocus].Bottom;
+        if (dx * dx + dy * dy <= rr) {
+            return (3);
+        }
+        return (-1);
+    } else {
+        return (-1);
+    }
+}
+
+function anchorTextHitTest(x, y) {
+
+    var dx, dy;
+
+    if (textboxFocus >= 0) {
+        // top-left
+        dx = x - textboxes[textboxFocus].initialX;
+        dy = y - (textboxes[textboxFocus].initialY - textboxes[textboxFocus].height);
+
+        if (dx * dx + dy * dy <= rr) {
+            //alert("hit");
+            return (0);
+        }
+        // top-right
+        dx = x - textboxes[textboxFocus].Right;
+        dy = y - (textboxes[textboxFocus].initialY - textboxes[textboxFocus].height);
+        if (dx * dx + dy * dy <= rr) {
+            //alert("hit");
+            return (1);
+        }
+        // bottom-right
+        dx = x - textboxes[textboxFocus].Right;
+        dy = y - textboxes[textboxFocus].initialY;
+        if (dx * dx + dy * dy <= rr) {
+            //alert("hit");
+            return (2);
+        }
+        // bottom-left
+        dx = x - textboxes[textboxFocus].initialX;
+        dy = y - textboxes[textboxFocus].initialY;
+        if (dx * dx + dy * dy <= rr) {
+            //alert("hit");
+            return (3);
+        }
+        return (-1);
+    } else {
+        return (-1);
+    }
+}
+
 function getPicObj(pic) {
     return new Photos(pic.obj, pic.initialX,
         pic.initialY, pic.width, pic.height, pic.r, pic.selected);
@@ -249,6 +392,21 @@ function hitImage(x, y) {
             y > photos[i].initialY && y < photos[i].initialY + photos[i].height + 25) {
             photos[i].selected = i;
             return (i);
+        } else {
+            // photos[i].selected = -1;
+        }
+    }
+    return (-1);
+}
+
+function hitTextbox(x, y) {
+    for (var i = 0; i < textboxes.length; i++) {
+        if (x > textboxes[i].initialX && x < textboxes[i].Right &&
+            y > textboxes[i].initialY - textboxes[i].height && y < textboxes[i].initialY) {
+            textboxes[i].selected = i;
+            return (i);
+        } else {
+            // textboxes[i].selected = -1;
         }
     }
     return (-1);
@@ -258,37 +416,98 @@ function handleMouseDown(e) {
     startX = parseInt(e.clientX - offsetX);
     startY = parseInt(e.clientY - offsetY);
 
+    // mine
     var nowClick = hitImage(startX, startY);
+    var nowClickText = hitTextbox(startX, startY);
 
-    // photoFocus = hitImage(startX, startY);
+    if (nowClickText == -1) {
 
+        if (nowClick == -1) {
+            draggingResizer = -1;
+        } else {
+            var pic = getPicObj(photos[nowClick]);
+            draggingResizer = pic.anchorHitTest(startX, startY);
+        }
 
-    if (nowClick == -1) {
-        draggingResizer = -1;
-    } else {
-        var pic = getPicObj(photos[nowClick]);
-        draggingResizer = pic.anchorHitTest(startX, startY);
+        if (draggingResizer == 0) {
+            photos.splice(nowClick, 1);
+            imgList.splice(nowClick, 1);
+            doSend(JSON.stringify(new Command("newPicture", JSON.stringify(photos))));
+            // draw();
+            return;
+        }
+
+        draggingImage = photoFocus;
+        if (nowClick >= 0) {
+            if (photoFocus != -1) {
+                photos[photoFocus].selected = -1;
+            }
+            photoFocus = nowClick;
+            photos[nowClick].selected = nowClick;
+
+            if (textboxFocus != -1) {
+                textboxes[textboxFocus].selected = -1;
+            }
+
+            draw();
+        } else {
+            draggingImage = -1;
+            if (photoFocus != -1) {
+                photos[photoFocus].selected = nowClick;
+            }
+            draw();
+        }
     }
 
-    draggingImage = photoFocus;
-    if (nowClick >= 0) {
-        if (photoFocus != -1) {
-            photos[photoFocus].selected = -1;
+    if (nowClick == -1) {
+
+
+        if (nowClickText == -1) {
+            draggingTextResizer = -1;
+        } else {
+            draggingTextResizer = anchorTextHitTest(startX, startY);
         }
-        photoFocus = nowClick;
-        photos[nowClick].selected = nowClick;
-        draw(photoFocus, photoFocus);
-    } else {
-        if (photoFocus != -1) {
-            photos[photoFocus].selected = nowClick;
+
+        draggingText = textboxFocus;
+        if (nowClickText >= 0) {
+            if (textboxFocus != -1) {
+                textboxes[textboxFocus].selected = -1;
+            }
+            textboxFocus = nowClickText;
+            textboxes[nowClickText].selected = nowClickText;
+
+
+            if (photoFocus != -1) {
+                photos[photoFocus].selected = -1;
+            }
+
+            draw();
+        } else {
+            draggingText = -1;
+            if (textboxFocus != -1) {
+                textboxes[textboxFocus].selected = nowClickText;
+            }
+            draw();
         }
-        draw();
+
+        //Delete Textbox
+        if (draggingTextResizer == 0) {
+            textboxes.splice(nowClickText, 1);
+            textboxFocus = -1;
+            draw();
+            return;
+        }
     }
 }
 
 function handleMouseUp(e) {
+    draggingTextResizer = -1;
     draggingResizer = -1;
     draggingImage = -1;
+    draggingText = -1;
+
+    // textboxFocus = -1;
+    // photoFocus = -1;
 
     var noBase64 = [];
     for (var i = 0; i < photos.length; i++) {
@@ -296,8 +515,10 @@ function handleMouseUp(e) {
             photos[i].width, photos[i].height, photos[i].r, photos[i].selected);
         noBase64.push(pic);
     }
-    console.log(JSON.stringify(noBase64));
+    // console.log(JSON.stringify(noBase64));
     doSend(JSON.stringify(new Command("picture", JSON.stringify(noBase64))));
+    console.log(JSON.stringify(textboxes));
+    doSend(JSON.stringify(new Command("text", JSON.stringify(textboxes))));
 }
 
 function handleMouseOut(e) {
@@ -360,7 +581,7 @@ function handleMouseMove(e) {
         photos[photoFocus].Bottom = photos[photoFocus].initialY + photos[photoFocus].height;
 
         // redraw the image with resizing anchors
-        draw(photoFocus, photoFocus);
+        draw();
     } else if (draggingImage >= 0 && photoFocus >= 0) {
         imageClick = false;
 
@@ -379,7 +600,56 @@ function handleMouseMove(e) {
         startY = mouseY;
 
         // redraw the image with border
-        draw(photoFocus, photoFocus);
+        draw();
+    }
+
+    //Do TextBox Resize or Move
+    if (draggingTextResizer > -1) {
+        mouseX = parseInt(e.clientX - offsetX);
+        mouseY = parseInt(e.clientY - offsetY);
+
+        //Do textbox resize
+        if (draggingTextResizer == 2) {
+            if ((mouseX - startX) > 0 && (mouseY - startY) > 0) {
+                textboxes[textboxFocus].fontsize += 1;
+                textboxes[textboxFocus].Right += 2;
+                textboxes[textboxFocus].width += 2;
+                textboxes[textboxFocus].height += 1;
+            } else if ((mouseX - startX) < 0 && (mouseY - startY) < 0) {
+                textboxes[textboxFocus].fontsize -= 1;
+                textboxes[textboxFocus].Right -= 2;
+                textboxes[textboxFocus].width += 2;
+                textboxes[textboxFocus].height -= 1;
+            }
+            if (textboxes[textboxFocus].Right < textboxes[textboxFocus].initialX + 100) {
+                textboxes[textboxFocus].Right = textboxes[textboxFocus].initialX + 100;
+            };
+            if (textboxes[textboxFocus].width < 100) {
+                textboxes[textboxFocus].width = 100;
+            };
+            if (textboxes[textboxFocus].height < 30) {
+                textboxes[textboxFocus].height = 30;
+            };
+        }
+        if (textboxes[textboxFocus].fontsize < 25) {
+            textboxes[textboxFocus].fontsize = 25
+        };
+        draw();
+    } else if (draggingText >= 0 && textboxFocus >= 0) {
+        mouseX = parseInt(e.clientX - offsetX);
+        mouseY = parseInt(e.clientY - offsetY);
+
+        // move the image by the amount of the latest drag
+        var dx = mouseX - startX;
+        var dy = mouseY - startY;
+        textboxes[textboxFocus].initialX += dx;
+        textboxes[textboxFocus].initialY += dy;
+        textboxes[textboxFocus].Right += dx;
+        textboxes[textboxFocus].Bottom += dy;
+        // reset the startXY for next time
+        startX = mouseX;
+        startY = mouseY;
+        draw();
     }
 }
 
@@ -394,14 +664,22 @@ function handleMouseMove(e) {
 // };
 
 mouseLayer.onmousedown = function(e) {
-    handleMouseDown(e);
+    if (modeFlag != 1) {
+        handleMouseDown(e);
+    }
 };
 mouseLayer.onmousemove = function(e) {
-    handleMouseMove(e);
+    if (modeFlag != 1) {
+        handleMouseMove(e);
+    }
 };
 mouseLayer.onmouseup = function(e) {
-    handleMouseUp(e);
+    if (modeFlag != 1) {
+        handleMouseUp(e);
+    }
 };
 mouseLayer.onmouseout = function(e) {
-    handleMouseOut(e);
+    if (modeFlag != 1) {
+        handleMouseOut(e);
+    }
 };
