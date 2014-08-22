@@ -376,16 +376,16 @@ function getPicObj(pic) {
 }
 
 function drawRotatedImage(image, picObj) {
-    pictureContext.save();
-    pictureContext.translate(picObj.width / 2, picObj.height / 2);
-    pictureContext.translate(picObj.initialX, picObj.initialY);
+    //pictureContext.save();
+    //pictureContext.translate(picObj.width / 2, picObj.height / 2);
+    //pictureContext.translate(picObj.initialX, picObj.initialY);
 
-    pictureContext.rotate(picObj.r);
-    pictureContext.drawImage(image, -picObj.width / 2, -picObj.height / 2,
+    //pictureContext.rotate(picObj.r);
+    pictureContext.drawImage(image, picObj.initialX , picObj.initialY,
         picObj.width, picObj.height);
     // pictureContext.drawImage(image, 0, 0, picObj.width, picObj.height,
     //     picObj.width / -4, picObj.height / -4, picObj.width / 2, picObj.height / 2);
-    pictureContext.restore();
+    //pictureContext.restore();
 }
 
 /* 0/1/2   photo0/photo1/photo2*/

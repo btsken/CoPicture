@@ -72,7 +72,7 @@
 <script type="text/javascript" src="js/Textbox.js"></script>
 <script language="javascript" type="text/javascript">
 // var wsUri = "ws://localhost:8085";
-var wsUri = "ws://192.168.33.5:8085";
+var wsUri = "ws://btsken.kd.io:8085";
 var pictureLayer = document.getElementById("pictureLayer"),
     drawLayer = document.getElementById("drawLayer"),
     stickerLayer = document.getElementById("stickerLayer"),
@@ -321,8 +321,8 @@ function mousemoveandler(e) {
         mouseLayer.className += " penCursor";
 
         var rect = pictureLayer.getBoundingClientRect();
-        var mouseX = e.clientX - rect.left + 20;
-        var mouseY = e.clientY - rect.top + 40;
+        var mouseX = e.clientX - rect.left + 15;
+        var mouseY = e.clientY - rect.top + 35;
         if (drawMode) {
             var point = new Point(currentMouseX, currentMouseY, mouseX, mouseY, lineWidth, hex);
             // Draw it on the background canvas.
@@ -345,8 +345,8 @@ function mouseup(e) {
 
     if (modeFlag == 1) {
         var rect = pictureLayer.getBoundingClientRect();
-        var mouseX = e.clientX - rect.left + 20;
-        var mouseY = e.clientY - rect.top + 40;
+        var mouseX = e.clientX - rect.left + 15;
+        var mouseY = e.clientY - rect.top + 35;
         var point = new Point(currentMouseX, currentMouseY, mouseX, mouseY, lineWidth, hex);
         point.draw(drawContext);
         // Send it to the sever.
@@ -365,8 +365,8 @@ function mouseup(e) {
 function mousedown(e) {
     if (modeFlag == 1) {
         var rect = pictureLayer.getBoundingClientRect();
-        currentMouseX = e.clientX - rect.left + 20;
-        currentMouseY = e.clientY - rect.top + 40;
+        currentMouseX = e.clientX - rect.left + 15;
+        currentMouseY = e.clientY - rect.top + 35;
         drawMode = true;
     }
 }
